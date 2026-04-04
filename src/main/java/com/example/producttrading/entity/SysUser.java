@@ -15,7 +15,7 @@ import java.util.Date;
  */
 @Data
 @TableName("sys_user")
-public class SysUser implements Serializable {
+public class SysUser extends BaseEntity{
     @TableId(value = "user_id", type = IdType.AUTO)
     private Integer userId;
     private String username;

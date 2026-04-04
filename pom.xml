@@ -38,6 +38,11 @@
             <artifactId>mysql-connector-j</artifactId>
             <version>8.0.32</version>
         </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-jsqlparser</artifactId>
+            <version>3.5.14</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -69,7 +74,7 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.example.producttrading.ProductTradingApplication</mainClass>
-                    <skip>true</skip>
+                    <skip>false</skip>
                 </configuration>
                 <executions>
                     <execution>
