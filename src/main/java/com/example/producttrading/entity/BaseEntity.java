@@ -1,6 +1,8 @@
 package com.example.producttrading.entity;
 
+import cn.hutool.core.annotation.PropIgnore;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -11,8 +13,12 @@ import java.io.Serializable;
  */
 @Data
 public class BaseEntity implements Serializable {
+    @JsonIgnore
+    @PropIgnore
     @TableField(exist = false)
     private Integer pageNum = 1;
+    @JsonIgnore
+    @PropIgnore
     @TableField(exist = false)
     private Integer pageSize = 10;
 }

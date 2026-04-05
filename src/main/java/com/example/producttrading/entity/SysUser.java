@@ -1,5 +1,6 @@
 package com.example.producttrading.entity;
 
+import cn.hutool.core.annotation.Alias;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -17,7 +18,9 @@ import java.util.Date;
 @TableName("sys_user")
 public class SysUser extends BaseEntity{
     @TableId(value = "user_id", type = IdType.AUTO)
+    @Alias("用户编号")
     private Integer userId;
+    @Alias("用户名")
     private String username;
     private String password;
     private String nickname;
@@ -25,8 +28,8 @@ public class SysUser extends BaseEntity{
     private String sex;
     private String phone;
     private String email;
-    private Integer status;
-    private Integer deleted;
+    private Long status ;
+    private Long deleted;
     private Date createTime;
     private Date updateTime;
     @TableField("type")
