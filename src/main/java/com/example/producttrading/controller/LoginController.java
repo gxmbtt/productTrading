@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.producttrading.entity.SysUser;
 import com.example.producttrading.service.SysUserService;
 import com.example.producttrading.utils.Result;
+import com.example.producttrading.utils.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,9 +27,16 @@ public class LoginController {
         if (sysUser == null) {
             return Result.error("用户不存在");
         }
-        if (!sysUser.getPassword().equals(map.get("password"))) {
+        if (!sysUser.getPassword().equals(DigestUtils.md5DigestAsHex(((String)map.get("password")).getBytes()) )) {
             return Result.error("密码不正确");
         }
+        String token = TokenUtils.createToken(sysUser.getUserId() + "", sysUser.getPassword());
+        sysUser.setToken(token);
         return Result.success(sysUser);
+    }
+    @PostMapping("/register")
+    public Result register(@RequestBody SysUser sysUser) {
+        sysUserService.save(sysUser);
+        return Result.success();
     }
 }

@@ -34,4 +34,6 @@ public class SysUser extends BaseEntity{
     private Date updateTime;
     @TableField("type")
     private String type;
+    @TableField(exist = false)
+    private String token;
 }
