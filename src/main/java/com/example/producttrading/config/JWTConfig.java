@@ -15,7 +15,7 @@ public class JWTConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor())
                 .addPathPatterns("/**")
-                .excludePathPatterns("/login","/register");
+                .excludePathPatterns("/login","/register","/api/**","/upload","/download","/products/list");
     }
 
     @Bean
