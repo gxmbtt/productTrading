@@ -17,9 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author guoxin
@@ -36,6 +34,7 @@ public class SysUserController {
         //添加查询条件
         QueryWrapper<SysUser> wrapper = new QueryWrapper<>();
         wrapper.like(StringUtils.hasText(sysUser.getUsername()),"username",sysUser.getUsername());
+        wrapper.like(StringUtils.hasText(sysUser.getNickname()),"nickname",sysUser.getNickname());
         wrapper.eq(StringUtils.hasText(sysUser.getType()),"type",sysUser.getType());
 
         //分页设置
@@ -74,12 +73,39 @@ public class SysUserController {
         wrapper.like(org.apache.commons.lang3.StringUtils.isNotEmpty(sysUser.getUsername()),"username",sysUser.getUsername());
 
         List<SysUser> list = sysUserService.list();
-        ExcelWriter writer = ExcelUtil.getWriter(true); // true表示创建xlsx格式
-        writer.write(list,true);
+        List<Map<String, Object>> exportList = toExportList(list);
+        writeExcel(response, exportList, "users.xlsx");
+    }
+    @PostMapping("/exportByIds")
+    public void exportByIds(HttpServletResponse response, @RequestBody Integer[] ids) throws IOException {
+        List<SysUser> list = sysUserService.listByIds(Arrays.asList(ids));
+        List<Map<String, Object>> exportList = toExportList(list);
+        writeExcel(response, exportList, "users.xlsx");
+    }
+
+    private List<Map<String, Object>> toExportList(List<SysUser> list) {
+        List<Map<String, Object>> exportList = new ArrayList<>();
+        for (SysUser user : list) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("用户编号", user.getUserId());
+            map.put("用户名", user.getUsername());
+            map.put("昵称", user.getNickname());
+            map.put("手机号", user.getPhone());
+            map.put("邮箱", user.getEmail());
+            map.put("性别", "1".equals(user.getSex()) ? "男" : "女");
+            map.put("用户类型", user.getType());
+            exportList.add(map);
+        }
+        return exportList;
+    }
+
+    private void writeExcel(HttpServletResponse response, List<Map<String, Object>> data, String filename) throws IOException {
+        ExcelWriter writer = ExcelUtil.getWriter(true);
+        writer.write(data, true);
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
-        response.setHeader("Content-Disposition","attachment;filename=test.xlsx");
+        response.setHeader("Content-Disposition", "attachment;filename=" + filename);
         ServletOutputStream os = response.getOutputStream();
-        writer.flush(os,true);
+        writer.flush(os, true);
         writer.close();
         IoUtil.close(os);
     }
