@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.producttrading.entity.Products;
 import com.example.producttrading.service.ProductsService;
+import com.example.producttrading.entity.SysUser;
 import com.example.producttrading.service.SysUserService;
 import com.example.producttrading.utils.Result;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,24 +43,23 @@ public class ProductsController {
     }
 */
     @GetMapping("/list")
-    public Result list(HttpServletRequest request, Products products){
+    public Result list(HttpServletRequest request, Products products) {
         //设置查询条件
         QueryWrapper<Products> queryWrapper = new QueryWrapper<>();
         queryWrapper.like(StrUtil.isNotBlank(products.getName()), "name", products.getName());
-        queryWrapper.eq(StrUtil.isNotBlank(products.getCategory()),"category", products.getCategory());
+        queryWrapper.eq(StrUtil.isNotBlank(products.getCategory()), "category", products.getCategory());
+        queryWrapper.eq(products.getStatus() != null, "status", products.getStatus());
 
-        //获取登录用户的编号, 从token中获取
-//        String token = request.getHeader("token");
-//        if (StrUtil.isNotBlank(token)){
-//            String audience = JWT.decode(token).getAudience().get(0);
-//            SysUser sysUser = sysUserService.getById(Integer.parseInt(audience));
-//            if (sysUser.getType().equals("普通用户")){
-//                queryWrapper.eq("user_id", sysUser.getUserId());
-//            }
-//        }
-
-        //设置排序
- //       queryWrapper.orderBy(StrUtil.isNotBlank(products.getColumn()),"asc".equalsIgnoreCase(products.getSort()),products.getColumn());
+        //从token中获取用户信息
+        String token = request.getHeader("token");
+        if (StrUtil.isNotBlank(token)) {
+            String audience = JWT.decode(token).getAudience().get(0);
+            SysUser sysUser = sysUserService.getById(Integer.parseInt(audience));
+            //如果是助农用户，只能查看自己创建的农产品
+            if (sysUser != null && "助农用户".equals(sysUser.getType())) {
+                queryWrapper.eq("user_id", sysUser.getUserId());
+            }
+        }
 
         //设置分页
         Page<Products> page = Page.of(products.getPageNum(), products.getPageSize());
@@ -71,13 +72,31 @@ public class ProductsController {
     }
 
     @PostMapping
-    public Result add(@RequestBody Products products){
+    public Result add(@RequestBody Products products, HttpServletRequest request){
+        Date now = new Date();
+        if (products.getCreateTime() == null) {
+            products.setCreateTime(now);
+        }
+        products.setUpdateTime(now);
+
+        String token = request.getHeader("token");
+        if (token != null){
+            String audience = JWT.decode(token).getAudience().get(0);
+            products.setUserId(Long.parseLong(audience));
+            SysUser sysUser = sysUserService.getById(Long.parseLong(audience));
+            if (sysUser != null) {
+                products.setCreateUser(sysUser.getNickname());
+            }
+        }
         productsService.save(products);
         return Result.success();
     }
 
     @PutMapping
     public Result update(@RequestBody Products products){
+
+        products.setUpdateTime(new Date());
+
         productsService.updateById(products);
         return Result.success();
     }

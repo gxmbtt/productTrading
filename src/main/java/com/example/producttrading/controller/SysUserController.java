@@ -57,6 +57,7 @@ public class SysUserController {
 
     @PutMapping
     public Result update(@RequestBody SysUser sysUser) {
+        sysUser.setUpdateTime(new Date());
         return sysUserService.updateById(sysUser) ? Result.success() : Result.error("操作失败");
     }
     @GetMapping("/{id}")

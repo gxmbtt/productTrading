@@ -30,9 +30,9 @@ public class Products extends BaseEntity{
     private String status;
     private long userId;
     @TableField(exist = false)
-    private SysUser sysUser; //添加商品的用户信息
+    private SysUser sysUser;
     private String createUser;
-    private Date createTime = new Date();
+    private Date createTime;
     private Date updateTime;
     private long deleted = 0;
 
