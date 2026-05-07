@@ -24,10 +24,10 @@ public class Cart extends BaseEntity{
     private Date createTime = new Date();
     private String createUser;
     private long status;
-    private String updateTime;
+    private Date updateTime;
     private String updateUser;
     private long goodsId;
-    private java.util.Date payTime;
+    private Date payTime;
     private long count;
     private String image;
 

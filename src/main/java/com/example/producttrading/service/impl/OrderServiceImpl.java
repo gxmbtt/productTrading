@@ -2,6 +2,7 @@ package com.example.producttrading.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.RandomUtil;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.producttrading.entity.Order;
 import com.example.producttrading.entity.Products;
@@ -50,16 +51,20 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 throw new CustomException(500, "农产品库存不足，不能下单！");
             }
         });
-        //库存充足则下单（每个产品生成一个订单）：订单号按照规范生成：用户编号+时间戳+4位随机数字
+        //库存充足则下单（每个产品生成一个订单）：订单号按照规范生成：用户编号+时间戳
         entityList.forEach(item -> {
-            String orderId = item.getUserId() + DateUtil.format(new Date(),"yyyyMMddHHmm") + RandomUtil.randomNumbers(4);
+            String orderId = item.getUserId() + DateUtil.format(new Date(),"yyyyMMddHHmm");
             item.setOrderId(orderId);
             item.setId(null);
             baseMapper.insert(item);
         });
-        //更新商品库存
+        //更新商品库存和销量
         entityList.forEach(item -> {
             productsMapper.updateStock(item.getProductId(), item.getCount());
+            UpdateWrapper<Products> wrapper = new UpdateWrapper<>();
+            wrapper.eq("id", item.getProductId());
+            wrapper.setSql("sell_count = sell_count + " + item.getCount());
+            productsMapper.update(null, wrapper);
         });
         //并且清空购物车
 

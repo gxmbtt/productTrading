@@ -27,6 +27,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements Ca
 
         if (list == null || list.size() == 0){
             baseMapper.insert(entity);
+            return true;
         }
 
         Cart cart = list.get(0);

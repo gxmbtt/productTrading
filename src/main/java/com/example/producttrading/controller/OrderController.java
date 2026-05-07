@@ -11,6 +11,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +30,9 @@ public class OrderController {
 
     @PostMapping
     public Result add(@RequestBody List<Order> orders){
+        for (Order order : orders) {
+            order.setCreateTime(new Date());
+        }
         orderService.saveBatch(orders);
         return Result.success();
     }
@@ -53,5 +59,26 @@ public class OrderController {
 
         return Result.success(map);
     }
-}
 
+    @GetMapping("/all")
+    public Result allList(Order order) {
+        QueryWrapper<Order> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(StrUtil.isNotBlank(order.getStatus()) && !"-1".equals(order.getStatus()), "status", order.getStatus());
+        queryWrapper.orderByDesc("create_time");
+        Page<Order> page = Page.of(order.getPageNum(), order.getPageSize());
+        List<Order> list = orderService.list(page, queryWrapper);
+        Map<String, Object> map = new HashMap<>();
+        map.put("total", page.getTotal());
+        map.put("list", list);
+        return Result.success(map);
+    }
+
+    @PutMapping("/status")
+    public Result updateStatus(@RequestBody Order order) {
+        UpdateWrapper<Order> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", order.getId());
+        updateWrapper.set("status", order.getStatus());
+        orderService.update(updateWrapper);
+        return Result.success();
+    }
+}
